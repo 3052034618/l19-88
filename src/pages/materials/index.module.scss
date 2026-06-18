@@ -439,3 +439,78 @@
   color: $color-text-primary;
   line-height: $line-height-normal;
 }
+
+.eventFilterBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-sm;
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.06) 0%, rgba(99, 102, 241, 0.06) 100%);
+  border-radius: $radius-md;
+  border-left: 4rpx solid $color-primary-light;
+}
+
+.eventFilterInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  flex-wrap: wrap;
+  min-width: 0;
+  flex: 1;
+}
+
+.eventFilterLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.eventFilterName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 360rpx;
+}
+
+.eventFilterClear {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(30, 58, 138, 0.1);
+  flex-shrink: 0;
+}
+
+.filterSectionTitle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
+  margin-top: $spacing-sm;
+  padding: 0 $spacing-xs;
+}
+
+.filterSectionLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.filterSectionHint {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.eventTabText {
+  font-size: $font-size-xs;
+  max-width: 200rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

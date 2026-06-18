@@ -431,3 +431,356 @@
   background: rgba(16, 185, 129, 0.12);
   color: #10B981;
 }
+
+.progressSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.progressRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.progressLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.progressBadge {
+  padding: 6rpx 20rpx;
+  border-radius: 999rpx;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.progressSpacer {
+  flex: 1;
+  min-width: $spacing-md;
+}
+
+.progressBtn {
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, $color-primary 0%, $color-accent 100%);
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  flex-shrink: 0;
+}
+
+.progressBtnText {
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  padding-top: $spacing-xs;
+  border-top: 2rpx dashed rgba(30, 58, 138, 0.08);
+}
+
+.timelineItem {
+  display: flex;
+  gap: $spacing-sm;
+  padding-bottom: $spacing-md;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.timelineLeft {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 32rpx;
+  flex-shrink: 0;
+  padding-top: 6rpx;
+}
+
+.timelineDot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 6rpx rgba(99, 102, 241, 0.12);
+}
+
+.timelineLine {
+  flex: 1;
+  width: 4rpx;
+  background: rgba(30, 58, 138, 0.1);
+  margin-top: 8rpx;
+}
+
+.timelineRight {
+  flex: 1;
+  min-width: 0;
+}
+
+.timelineHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-xs;
+  margin-bottom: 4rpx;
+}
+
+.timelineBadge {
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+}
+
+.timelineTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}
+
+.timelineNote {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  line-height: $line-height-loose;
+  margin-bottom: 2rpx;
+}
+
+.timelineAuthor {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.materialSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.materialQuickRow {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.materialQuickBtn {
+  flex: 1;
+  padding: $spacing-sm $spacing-xs;
+  border-radius: $radius-md;
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.04) 0%, rgba(99, 102, 241, 0.04) 100%);
+  border: 2rpx solid rgba(30, 58, 138, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.97);
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
+  }
+}
+
+.materialQuickIcon {
+  font-size: 40rpx;
+}
+
+.materialQuickText {
+  font-size: $font-size-xs;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.materialQuickCount {
+  font-size: 22rpx;
+  color: $color-text-tertiary;
+}
+
+.eventMaterialsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.groupTitle {
+  display: block;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-top: $spacing-sm;
+  margin-bottom: 4rpx;
+}
+
+.groupCount {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-normal;
+  color: $color-text-tertiary;
+}
+
+.materialEmpty {
+  padding: $spacing-md;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.03) 0%, rgba(99, 102, 241, 0.03) 100%);
+  border-radius: $radius-md;
+}
+
+.materialEmptyText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  z-index: 999;
+}
+
+.modal {
+  width: 100%;
+  max-height: 85vh;
+  background: $color-bg-page;
+  border-top-left-radius: $radius-xl;
+  border-top-right-radius: $radius-xl;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg $spacing-xl;
+  border-bottom: 2rpx solid rgba(30, 58, 138, 0.05);
+}
+
+.modalTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.modalClose {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-bg-hover;
+  border-radius: 50%;
+  color: $color-text-tertiary;
+  font-size: 32rpx;
+  line-height: 52rpx;
+  text-align: center;
+}
+
+.modalBody {
+  flex: 1;
+  padding: $spacing-lg $spacing-xl;
+  max-height: 60vh;
+  min-height: 200rpx;
+}
+
+.modalFooter {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-xl $spacing-lg;
+  border-top: 2rpx solid rgba(30, 58, 138, 0.05);
+}
+
+.cancelBtn {
+  flex: 1;
+  background: $color-bg-card;
+  color: $color-text-secondary;
+  font-size: $font-size-md;
+  border-radius: $radius-button;
+  border: none;
+  height: 88rpx;
+  line-height: 84rpx;
+}
+
+.confirmBtn {
+  flex: 2;
+  background: linear-gradient(135deg, $color-primary 0%, $color-accent 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  border-radius: $radius-button;
+  border: none;
+  height: 88rpx;
+  line-height: 84rpx;
+}
+
+.formItem {
+  margin-bottom: $spacing-lg;
+}
+
+.formLabel {
+  display: block;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.formOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.formOption {
+  padding: 12rpx 28rpx;
+  border-radius: 999rpx;
+  background: $color-bg-card;
+  border: 2rpx solid rgba(30, 58, 138, 0.1);
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+}
+
+.formOptionActive {
+  border-color: $color-primary;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.formTextareaWrap {
+  width: 100%;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-sm;
+  border: 2rpx solid rgba(30, 58, 138, 0.08);
+}
+
+.formTextarea {
+  width: 100%;
+  min-height: 160rpx;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  line-height: $line-height-loose;
+}
+
+.placeholder {
+  color: $color-text-tertiary;
+}

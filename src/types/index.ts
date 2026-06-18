@@ -1,3 +1,13 @@
+export type EventProgressStatus = 'pending_review' | 'handling' | 'responded' | 'reviewed'
+
+export interface ProgressLogEntry {
+  id: string
+  status: EventProgressStatus
+  note: string
+  createdAt: string
+  author: string
+}
+
 export interface EventItem {
   id: string
   title: string
@@ -6,6 +16,7 @@ export interface EventItem {
   region: string
   screenshot?: string
   status: 'analyzing' | 'pending' | 'tracked'
+  progressStatus: EventProgressStatus
   createdAt: string
   sourceCount?: number
   peakTime?: string
@@ -64,6 +75,7 @@ export interface MaterialItem {
   title: string
   content: string
   permission: MaterialPermission
+  eventId?: string | null
   updatedAt: string
   author: string
   version: number

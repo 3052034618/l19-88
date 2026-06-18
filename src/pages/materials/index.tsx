@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { View, Text, Button, ScrollView, Input, Textarea } from '@tarojs/components'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro, { useDidShow, useRouter } from '@tarojs/taro'
 import classnames from 'classnames'
 import styles from './index.module.scss'
 import MaterialCard from '@/components/MaterialCard'
 import { categoryConfig, permissionConfig } from '@/data/materials'
 import { useMaterialsStore } from '@/store/materials'
-import type { MaterialCategory, MaterialPermission, MaterialItem } from '@/types'
+import { useEventsStore } from '@/store/events'
+import type { MaterialCategory, MaterialPermission, MaterialItem, EventItem } from '@/types'
 
 const allCategory = { key: 'all', name: '全部', color: '#1E3A8A' }
 const categories = [allCategory, ...categoryConfig]
@@ -17,11 +18,15 @@ const allPermission = {
   bgColor: '#EEF2FF',
   textColor: '#1E3A8A'
 }
+const allEventOption = { id: 'all', title: '全部事件', brandLine: '', region: '', keyword: '' }
 const permissionFilters = [allPermission, ...permissionConfig]
 
 const MaterialsPage: React.FC = () => {
+  const router = useRouter()
+
   const [activeCategory, setActiveCategory] = useState<string>('all')
   const [activePermission, setActivePermission] = useState<string>('all')
+  const [activeEventId, setActiveEventId] = useState<string>('all')
   const [showModal, setShowModal] = useState(false)
   const [highlightId, setHighlightId] = useState<string | null>(null)
 
@@ -29,18 +34,71 @@ const MaterialsPage: React.FC = () => {
   const initMaterials = useMaterialsStore((s) => s.initMaterials)
   const addMaterial = useMaterialsStore((s) => s.addMaterial)
 
+  const initEvents = useEventsStore((s) => s.initEvents)
+  const events = useEventsStore((s) => s.events)
+  const setActiveEvent = useEventsStore((s) => s.setActiveEvent)
+
   const [formCategory, setFormCategory] = useState<MaterialCategory>('fact')
   const [formTitle, setFormTitle] = useState('')
   const [formContent, setFormContent] = useState('')
   const [formPermission, setFormPermission] = useState<MaterialPermission>('internal')
+  const [formEventId, setFormEventId] = useState<string>('none')
 
   useDidShow(() => {
     initMaterials()
+    initEvents()
   })
 
   useEffect(() => {
     initMaterials()
-  }, [initMaterials])
+    initEvents()
+  }, [initMaterials, initEvents])
+
+  const applyParams = useCallback((params: { eventId?: string; permission?: string }) => {
+    console.log('[MaterialsPage] applyParams:', params)
+    if (params.eventId) {
+      setActiveEventId(params.eventId)
+      setActiveEvent(params.eventId)
+    }
+    if (params.permission) {
+      setActivePermission(params.permission)
+    }
+    setActiveCategory('all')
+  }, [setActiveEvent])
+
+  const openAdd = useCallback((opts: { eventId?: string }) => {
+    console.log('[MaterialsPage] openAdd:', opts)
+    setFormCategory('fact')
+    setFormTitle('')
+    setFormContent('')
+    setFormPermission('internal')
+    setFormEventId(opts.eventId || 'none')
+    setShowModal(true)
+  }, [])
+
+  useEffect(() => {
+    const onApplyParams = (p: any) => applyParams(p)
+    const onOpenAdd = (p: any) => openAdd(p || {})
+    Taro.eventCenter.on('materials:applyParams', onApplyParams)
+    Taro.eventCenter.on('materials:openAdd', onOpenAdd)
+    return () => {
+      Taro.eventCenter.off('materials:applyParams', onApplyParams)
+      Taro.eventCenter.off('materials:openAdd', onOpenAdd)
+    }
+  }, [applyParams, openAdd])
+
+  useEffect(() => {
+    const p = router.params
+    if (p && typeof p === 'object') {
+      if (p.eventId) {
+        setActiveEventId(String(p.eventId))
+        setActiveEvent(String(p.eventId))
+      }
+      if (p.permission) {
+        setActivePermission(String(p.permission))
+      }
+    }
+  }, [router.params, setActiveEvent])
 
   const handleRefresh = () => {
     console.log('[MaterialsPage] pull down refresh')
@@ -56,28 +114,62 @@ const MaterialsPage: React.FC = () => {
     }
   }, [])
 
-  const filteredMaterials: MaterialItem[] = materials.filter((m) => {
-    const categoryMatch = activeCategory === 'all' || m.category === activeCategory
-    const permissionMatch = activePermission === 'all' || m.permission === activePermission
-    return categoryMatch && permissionMatch
-  })
+  const eventOptions = useMemo<Array<{ id: string; title: string }>>(() => {
+    return [allEventOption, ...events.map((e) => ({
+      id: e.id,
+      title: e.title,
+      brandLine: e.brandLine,
+      region: e.region,
+      keyword: e.keyword
+    }))]
+  }, [events])
 
-  const stats = {
-    total: materials.length,
-    public: materials.filter((m) => m.permission === 'public').length,
-    internal: materials.filter((m) => m.permission === 'internal').length,
-    legal: materials.filter((m) => m.permission === 'legal').length
-  }
+  const activeEventTitle = useMemo(() => {
+    if (activeEventId === 'all') return '全部事件'
+    const ev = events.find((e) => e.id === activeEventId)
+    return ev ? ev.title : '全部事件'
+  }, [activeEventId, events])
+
+  const filteredMaterials: MaterialItem[] = useMemo(() => {
+    return materials.filter((m) => {
+      const categoryMatch = activeCategory === 'all' || m.category === activeCategory
+      const permissionMatch = activePermission === 'all' || m.permission === activePermission
+      const eventMatch =
+        activeEventId === 'all'
+          ? true
+          : activeEventId === 'none'
+          ? !m.eventId
+          : m.eventId === activeEventId
+      return categoryMatch && permissionMatch && eventMatch
+    })
+  }, [materials, activeCategory, activePermission, activeEventId])
+
+  const stats = useMemo(() => {
+    const scope =
+      activeEventId === 'all'
+        ? materials
+        : activeEventId === 'none'
+        ? materials.filter((m) => !m.eventId)
+        : materials.filter((m) => m.eventId === activeEventId)
+    return {
+      total: scope.length,
+      public: scope.filter((m) => m.permission === 'public').length,
+      internal: scope.filter((m) => m.permission === 'internal').length,
+      legal: scope.filter((m) => m.permission === 'legal').length
+    }
+  }, [materials, activeEventId])
 
   const resetForm = () => {
     setFormCategory('fact')
     setFormTitle('')
     setFormContent('')
     setFormPermission('internal')
+    setFormEventId('none')
   }
 
   const handleAdd = () => {
     resetForm()
+    setFormEventId(activeEventId !== 'all' && activeEventId !== 'none' ? activeEventId : 'none')
     setShowModal(true)
   }
 
@@ -91,40 +183,65 @@ const MaterialsPage: React.FC = () => {
       return
     }
 
-    const newId = 'm_tmp_' + Date.now().toString(36)
-    addMaterial({
+    const eventIdToSave = formEventId === 'none' ? null : formEventId
+    const newId = addMaterial({
       category: formCategory,
       title: formTitle.trim(),
       content: formContent.trim(),
-      permission: formPermission
+      permission: formPermission,
+      eventId: eventIdToSave
     })
     Taro.showToast({ title: '已保存', icon: 'success' })
     setShowModal(false)
 
+    if (eventIdToSave) {
+      setActiveEventId(eventIdToSave)
+      setActiveEvent(eventIdToSave)
+    } else {
+      setActiveEventId('all')
+    }
     setActiveCategory('all')
     setActivePermission(formPermission)
 
     setTimeout(() => {
-      const store = useMaterialsStore.getState?.()
-      const first = store?.materials[0]
-      if (first) {
-        setHighlightId(first.id)
-        setTimeout(() => setHighlightId(null), 2500)
-      }
+      setHighlightId(newId)
+      setTimeout(() => setHighlightId(null), 2500)
     }, 50)
 
     resetForm()
   }
 
   const permissionCount = (key: string) => {
-    if (key === 'all') return materials.length
-    return materials.filter((m) => m.permission === key).length
+    const scope =
+      activeEventId === 'all'
+        ? materials
+        : activeEventId === 'none'
+        ? materials.filter((m) => !m.eventId)
+        : materials.filter((m) => m.eventId === activeEventId)
+    if (key === 'all') return scope.length
+    return scope.filter((m) => m.permission === key).length
   }
 
   const categoryCount = (key: string) => {
-    const base = key === 'all' ? materials : materials.filter((m) => m.category === key)
+    let base =
+      activeEventId === 'all'
+        ? materials
+        : activeEventId === 'none'
+        ? materials.filter((m) => !m.eventId)
+        : materials.filter((m) => m.eventId === activeEventId)
+    base = key === 'all' ? base : base.filter((m) => m.category === key)
     if (activePermission === 'all') return base.length
     return base.filter((m) => m.permission === activePermission).length
+  }
+
+  const eventCount = (id: string) => {
+    if (id === 'all') return materials.length
+    if (id === 'none') return materials.filter((m) => !m.eventId).length
+    return materials.filter((m) => m.eventId === id).length
+  }
+
+  const handleClearEventFilter = () => {
+    setActiveEventId('all')
   }
 
   return (
@@ -135,10 +252,20 @@ const MaterialsPage: React.FC = () => {
           <Text className={styles.heroDesc}>统一管理核实事实、口径说明，标记公开级别</Text>
         </View>
 
+        {activeEventId !== 'all' && (
+          <View className={styles.eventFilterBar}>
+            <View className={styles.eventFilterInfo}>
+              <Text className={styles.eventFilterLabel}>当前事件：</Text>
+              <Text className={styles.eventFilterName}>{activeEventTitle}</Text>
+            </View>
+            <Text className={styles.eventFilterClear} onClick={handleClearEventFilter}>清除筛选</Text>
+          </View>
+        )}
+
         <View className={styles.statsRow}>
           <View className={styles.statCard}>
             <Text className={styles.statValue}>{stats.total}</Text>
-            <Text className={styles.statName}>材料总数</Text>
+            <Text className={styles.statName}>{activeEventId === 'all' ? '材料总数' : '本事件材料'}</Text>
           </View>
           <View className={styles.statCard}>
             <Text className={styles.statValue} style={{ color: '#10B981' }}>{stats.public}</Text>
@@ -171,6 +298,33 @@ const MaterialsPage: React.FC = () => {
           })}
           <View className={styles.legendHint}>提示：点击卡片上的级别标签可直接修改公开级别</View>
         </View>
+
+        <View className={styles.filterSectionTitle}>
+          <Text className={styles.filterSectionLabel}>按事件</Text>
+          <Text className={styles.filterSectionHint}>筛选指定追踪事件的回应材料</Text>
+        </View>
+        <ScrollView scrollX className={styles.categoryTabs}>
+          {eventOptions.map((ev) => (
+            <View
+              key={'event_' + ev.id}
+              className={classnames(styles.categoryTab, activeEventId === ev.id && styles.categoryTabActive)}
+              onClick={() => setActiveEventId(ev.id)}
+            >
+              <Text numberOfLines={1} className={styles.eventTabText}>
+                {ev.title.length > 10 ? ev.title.slice(0, 10) + '…' : ev.title}
+              </Text>
+              <Text className={styles.categoryCount}>{eventCount(ev.id)}</Text>
+            </View>
+          ))}
+          <View
+            key={'event_none'}
+            className={classnames(styles.categoryTab, activeEventId === 'none' && styles.categoryTabActive)}
+            onClick={() => setActiveEventId('none')}
+          >
+            <Text className={styles.eventTabText}>未关联事件</Text>
+            <Text className={styles.categoryCount}>{eventCount('none')}</Text>
+          </View>
+        </ScrollView>
 
         <ScrollView scrollX className={styles.categoryTabs}>
           {permissionFilters.map((p) => (
@@ -229,8 +383,8 @@ const MaterialsPage: React.FC = () => {
               <View className={styles.emptyIcon}>
                 <Text>📁</Text>
               </View>
-              <Text className={styles.emptyTitle}>该分类下暂无符合条件的材料</Text>
-              <Text className={styles.emptyDesc}>点击上方按钮新增回应材料，或切换其他筛选</Text>
+              <Text className={styles.emptyTitle}>该筛选条件下暂无材料</Text>
+              <Text className={styles.emptyDesc}>点击上方按钮新增回应材料，或切换其他筛选条件</Text>
             </View>
           )}
         </View>
@@ -247,6 +401,35 @@ const MaterialsPage: React.FC = () => {
             </View>
 
             <ScrollView scrollY className={styles.modalBody}>
+              <View className={styles.formItem}>
+                <Text className={styles.formLabel}>关联追踪事件</Text>
+                <View className={styles.formOptions}>
+                  <View
+                    className={classnames(
+                      styles.formOption,
+                      formEventId === 'none' && styles.formOptionActive
+                    )}
+                    onClick={() => setFormEventId('none')}
+                  >
+                    <Text>不关联</Text>
+                  </View>
+                  {events.map((ev) => (
+                    <View
+                      key={ev.id}
+                      className={classnames(
+                        styles.formOption,
+                        formEventId === ev.id && styles.formOptionActive
+                      )}
+                      onClick={() => setFormEventId(ev.id)}
+                    >
+                      <Text numberOfLines={1}>
+                        {ev.title.length > 8 ? ev.title.slice(0, 8) + '…' : ev.title}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
               <View className={styles.formItem}>
                 <Text className={styles.formLabel}>分类</Text>
                 <View className={styles.formOptions}>

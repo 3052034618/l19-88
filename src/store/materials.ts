@@ -3,7 +3,7 @@ import Taro from '@tarojs/taro'
 import type { MaterialItem, MaterialPermission, MaterialCategory } from '@/types'
 import { mockMaterials, categoryConfig } from '@/data/materials'
 
-const STORAGE_KEY = 'pr_materials_v1'
+const STORAGE_KEY = 'pr_materials_v2'
 
 interface MaterialsState {
   materials: MaterialItem[]
@@ -14,9 +14,11 @@ interface MaterialsState {
     title: string
     content: string
     permission: MaterialPermission
-  }) => void
+    eventId?: string | null
+  }) => string
   updatePermission: (id: string, permission: MaterialPermission) => void
   deleteMaterial: (id: string) => void
+  getMaterialsByEvent: (eventId: string) => MaterialItem[]
 }
 
 const categoryNameMap = categoryConfig.reduce<Record<string, string>>((acc, cur) => {
@@ -67,19 +69,21 @@ export const useMaterialsStore = create<MaterialsState>((set, get) => ({
     } else {
       set({ materials: mockMaterials, initialized: true })
       saveToStorage(mockMaterials)
-      console.log('[MaterialsStore] use default mock data')
+      console.log('[MaterialsStore] use default mock data (v2)')
     }
   },
 
   addMaterial: (data) => {
     const { materials } = get()
+    const id = genId()
     const newItem: MaterialItem = {
-      id: genId(),
+      id,
       category: data.category,
       categoryName: categoryNameMap[data.category] || '未分类',
       title: data.title,
       content: data.content,
       permission: data.permission,
+      eventId: data.eventId ?? null,
       updatedAt: nowStr(),
       author: '当前用户',
       version: 1
@@ -87,7 +91,8 @@ export const useMaterialsStore = create<MaterialsState>((set, get) => ({
     const next = [newItem, ...materials]
     set({ materials: next })
     saveToStorage(next)
-    console.log('[MaterialsStore] added new material:', newItem.id)
+    console.log('[MaterialsStore] added new material:', id, 'eventId:', data.eventId)
+    return id
   },
 
   updatePermission: (id, permission) => {
@@ -108,5 +113,9 @@ export const useMaterialsStore = create<MaterialsState>((set, get) => ({
     set({ materials: next })
     saveToStorage(next)
     console.log('[MaterialsStore] deleted:', id)
+  },
+
+  getMaterialsByEvent: (eventId) => {
+    return get().materials.filter((m) => m.eventId === eventId)
   }
 }))
