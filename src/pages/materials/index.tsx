@@ -10,10 +10,20 @@ import type { MaterialCategory, MaterialPermission, MaterialItem } from '@/types
 
 const allCategory = { key: 'all', name: '全部', color: '#1E3A8A' }
 const categories = [allCategory, ...categoryConfig]
+const allPermission = {
+  key: 'all' as const,
+  name: '全部级别',
+  color: '#1E3A8A',
+  bgColor: '#EEF2FF',
+  textColor: '#1E3A8A'
+}
+const permissionFilters = [allPermission, ...permissionConfig]
 
 const MaterialsPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all')
+  const [activePermission, setActivePermission] = useState<string>('all')
   const [showModal, setShowModal] = useState(false)
+  const [highlightId, setHighlightId] = useState<string | null>(null)
 
   const materials = useMaterialsStore((s) => s.materials)
   const initMaterials = useMaterialsStore((s) => s.initMaterials)
@@ -46,10 +56,11 @@ const MaterialsPage: React.FC = () => {
     }
   }, [])
 
-  const filteredMaterials: MaterialItem[] =
-    activeCategory === 'all'
-      ? materials
-      : materials.filter((m) => m.category === activeCategory)
+  const filteredMaterials: MaterialItem[] = materials.filter((m) => {
+    const categoryMatch = activeCategory === 'all' || m.category === activeCategory
+    const permissionMatch = activePermission === 'all' || m.permission === activePermission
+    return categoryMatch && permissionMatch
+  })
 
   const stats = {
     total: materials.length,
@@ -79,6 +90,8 @@ const MaterialsPage: React.FC = () => {
       Taro.showToast({ title: '请输入内容', icon: 'none' })
       return
     }
+
+    const newId = 'm_tmp_' + Date.now().toString(36)
     addMaterial({
       category: formCategory,
       title: formTitle.trim(),
@@ -87,7 +100,31 @@ const MaterialsPage: React.FC = () => {
     })
     Taro.showToast({ title: '已保存', icon: 'success' })
     setShowModal(false)
+
+    setActiveCategory('all')
+    setActivePermission(formPermission)
+
+    setTimeout(() => {
+      const store = useMaterialsStore.getState?.()
+      const first = store?.materials[0]
+      if (first) {
+        setHighlightId(first.id)
+        setTimeout(() => setHighlightId(null), 2500)
+      }
+    }, 50)
+
     resetForm()
+  }
+
+  const permissionCount = (key: string) => {
+    if (key === 'all') return materials.length
+    return materials.filter((m) => m.permission === key).length
+  }
+
+  const categoryCount = (key: string) => {
+    const base = key === 'all' ? materials : materials.filter((m) => m.category === key)
+    if (activePermission === 'all') return base.length
+    return base.filter((m) => m.permission === activePermission).length
   }
 
   return (
@@ -128,11 +165,32 @@ const MaterialsPage: React.FC = () => {
             return (
               <View key={p.key} className={styles.legendItem}>
                 <View className={classnames(styles.legendDot, dotClass)} />
-                <Text className={styles.legendText}>{p.name}（点击标签可直接修改）</Text>
+                <Text className={styles.legendText}>{p.name}</Text>
               </View>
             )
           })}
+          <View className={styles.legendHint}>提示：点击卡片上的级别标签可直接修改公开级别</View>
         </View>
+
+        <ScrollView scrollX className={styles.categoryTabs}>
+          {permissionFilters.map((p) => (
+            <View
+              key={'perm_' + p.key}
+              className={classnames(styles.categoryTab, activePermission === p.key && styles.categoryTabActive)}
+              style={
+                activePermission === p.key && p.key !== 'all'
+                  ? {
+                      background: `linear-gradient(135deg, ${p.textColor} 0%, ${p.color} 100%)`
+                    }
+                  : {}
+              }
+              onClick={() => setActivePermission(p.key)}
+            >
+              <Text>{p.name}</Text>
+              <Text className={styles.categoryCount}>{permissionCount(p.key)}</Text>
+            </View>
+          ))}
+        </ScrollView>
 
         <ScrollView scrollX className={styles.categoryTabs}>
           {categories.map((cat) => (
@@ -143,9 +201,7 @@ const MaterialsPage: React.FC = () => {
             >
               <Text>{cat.name}</Text>
               <Text className={styles.categoryCount}>
-                {cat.key === 'all'
-                  ? materials.length
-                  : materials.filter((m) => m.category === cat.key).length}
+                {categoryCount(cat.key)}
               </Text>
             </View>
           ))}
@@ -161,15 +217,20 @@ const MaterialsPage: React.FC = () => {
         <View className={styles.materialList}>
           {filteredMaterials.length > 0 ? (
             filteredMaterials.map((material) => (
-              <MaterialCard key={material.id} material={material} />
+              <View
+                key={material.id}
+                className={classnames(highlightId === material.id && styles.highlightCard)}
+              >
+                <MaterialCard material={material} />
+              </View>
             ))
           ) : (
             <View className={styles.emptyState}>
               <View className={styles.emptyIcon}>
                 <Text>📁</Text>
               </View>
-              <Text className={styles.emptyTitle}>该分类暂无材料</Text>
-              <Text className={styles.emptyDesc}>点击上方按钮新增回应材料</Text>
+              <Text className={styles.emptyTitle}>该分类下暂无符合条件的材料</Text>
+              <Text className={styles.emptyDesc}>点击上方按钮新增回应材料，或切换其他筛选</Text>
             </View>
           )}
         </View>

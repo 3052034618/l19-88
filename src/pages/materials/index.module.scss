@@ -92,6 +92,14 @@
   color: $color-text-secondary;
 }
 
+.legendHint {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  padding-top: $spacing-xs;
+  border-top: 2rpx dashed rgba(30, 58, 138, 0.08);
+  margin-top: 4rpx;
+}
+
 .categoryTabs {
   @include scroll-x-container;
   margin-bottom: $spacing-md;
@@ -171,6 +179,27 @@
 .materialList {
   display: flex;
   flex-direction: column;
+}
+
+.highlightCard {
+  animation: highlightPulse 2.2s ease-out;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-sm;
+}
+
+@keyframes highlightPulse {
+  0% {
+    box-shadow: 0 0 0 6rpx rgba(245, 158, 11, 0.35);
+    transform: scale(1.015);
+  }
+  60% {
+    box-shadow: 0 0 0 2rpx rgba(245, 158, 11, 0.15);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    transform: scale(1);
+  }
 }
 
 .emptyState {

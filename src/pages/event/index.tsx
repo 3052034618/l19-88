@@ -1,17 +1,13 @@
 import React, { useState, useCallback } from 'react'
 import { View, Text, Input, Textarea, Button, Image, ScrollView } from '@tarojs/components'
-import Taro from '@tarojs/taro'
+import Taro, { useDidShow } from '@tarojs/taro'
 import classnames from 'classnames'
 import styles from './index.module.scss'
 import SectionHeader from '@/components/SectionHeader'
 import EventCard from '@/components/EventCard'
-import type { EventAnalysisResult } from '@/types'
-import {
-  mockEvents,
-  mockAnalysisResult,
-  brandLines,
-  regions
-} from '@/data/events'
+import type { EventAnalysisResult, EventItem } from '@/types'
+import { brandLines, regions } from '@/data/events'
+import { useEventsStore } from '@/store/events'
 
 const EventPage: React.FC = () => {
   const [keyword, setKeyword] = useState('')
@@ -21,6 +17,26 @@ const EventPage: React.FC = () => {
   const [screenshot, setScreenshot] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<EventAnalysisResult | null>(null)
+  const [trackedList, setTrackedList] = useState<EventItem[]>([])
+
+  const initEvents = useEventsStore((s) => s.initEvents)
+  const addTrackedEvent = useEventsStore((s) => s.addTrackedEvent)
+  const getAllTracked = useEventsStore((s) => s.getAllTracked)
+  const setActiveEvent = useEventsStore((s) => s.setActiveEvent)
+
+  const refreshTracked = useCallback(() => {
+    setTrackedList(getAllTracked())
+  }, [getAllTracked])
+
+  useDidShow(() => {
+    initEvents()
+    refreshTracked()
+  })
+
+  React.useEffect(() => {
+    initEvents()
+    refreshTracked()
+  }, [initEvents, refreshTracked])
 
   const formatNumber = (num: number) => {
     if (num >= 10000) {
@@ -74,15 +90,33 @@ const EventPage: React.FC = () => {
     console.log('[EventPage] submit event:', { keyword, selectedBrand, selectedRegion })
 
     setTimeout(() => {
+      const { eventId, analysis } = addTrackedEvent({
+        keyword: keyword.trim(),
+        description: description.trim(),
+        brandLine: selectedBrand,
+        region: selectedRegion,
+        screenshot
+      })
       setIsAnalyzing(false)
-      setAnalysisResult(mockAnalysisResult)
+      setAnalysisResult(analysis)
+      setActiveEvent(eventId)
+      refreshTracked()
+      Taro.showToast({ title: '已加入追踪事件', icon: 'success' })
     }, 2000)
-  }, [keyword, selectedBrand, selectedRegion])
+  }, [keyword, description, selectedBrand, selectedRegion, screenshot, addTrackedEvent, setActiveEvent, refreshTracked])
+
+  const handleEventClick = (event: EventItem) => {
+    setActiveEvent(event.id)
+    Taro.navigateTo({
+      url: `/pages/event-detail/index?id=${event.id}`
+    })
+  }
 
   const handleRefresh = () => {
     console.log('[EventPage] pull down refresh')
     setTimeout(() => {
       Taro.stopPullDownRefresh()
+      refreshTracked()
     }, 1000)
   }
 
@@ -285,9 +319,11 @@ const EventPage: React.FC = () => {
       )}
 
       <View className={styles.eventList}>
-        <SectionHeader title="最近追踪事件" rightText="查看全部" />
-        {mockEvents.slice(0, 3).map((event) => (
-          <EventCard key={event.id} event={event} />
+        <SectionHeader title="最近追踪事件" desc={`共 ${trackedList.length} 条`} rightText={trackedList.length > 3 ? '查看全部' : undefined} />
+        {(trackedList.length > 0 ? trackedList.slice(0, 5) : []).map((event) => (
+          <View key={event.id} onClick={() => handleEventClick(event)}>
+            <EventCard event={event} />
+          </View>
         ))}
       </View>
     </ScrollView>
