@@ -89,14 +89,15 @@
 }
 
 .filterRow {
-  display: flex;
-  gap: $spacing-sm;
+  @include scroll-x-container;
   margin-bottom: $spacing-md;
-  overflow-x: auto;
   padding-bottom: 4rpx;
 }
 
 .filterItem {
+  @include scroll-x-item(auto);
+  display: inline-flex;
+  margin-right: $spacing-sm;
   padding: 14rpx 28rpx;
   background: $color-bg-card;
   border-radius: $radius-button;

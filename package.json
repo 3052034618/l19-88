@@ -56,9 +56,6 @@
     "dayjs": "^1.11.10"
   },
   "devDependencies": {
-    "miniprogram-ci": "^2.1.26",
-    "tt-ide-cli": "^0.1.31",
-    "minidev": "^2.2.5",
     "@babel/preset-react": "^7.24.1",
     "@babel/plugin-proposal-class-properties": "7.14.5",
     "@babel/core": "^7.8.0",
@@ -66,7 +63,7 @@
     "@tarojs/cli": "4.1.9",
     "@types/webpack-env": "^1.13.6",
     "@types/react": "^18.0.0",
-    "webpack": "5.78.0",
+    "webpack": "5.91.0",
     "@tarojs/taro-loader": "4.1.9",
     "@tarojs/webpack5-runner": "4.1.9",
     "babel-preset-taro": "4.1.9",
