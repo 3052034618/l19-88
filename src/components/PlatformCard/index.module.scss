@@ -1,0 +1,181 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-lg;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  flex: 1;
+}
+
+.icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconText {
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+}
+
+.info {
+  flex: 1;
+}
+
+.name {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.stat {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.dot {
+  color: $color-text-disabled;
+  font-size: $font-size-xs;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.sentiment {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.arrow {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.expanded {
+  padding: 0 $spacing-lg $spacing-lg;
+  border-top: 1rpx solid $color-divider;
+}
+
+.drivingSection {
+  padding: $spacing-md 0;
+}
+
+.drivingTitle {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  display: block;
+  margin-bottom: $spacing-sm;
+}
+
+.drivingTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.drivingTag {
+  padding: 8rpx 20rpx;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  color: $color-error;
+}
+
+.entries {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.entry {
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+}
+
+.entryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.entryTitle {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  flex: 1;
+  @include text-ellipsis-multi(2);
+}
+
+.trend {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $radius-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+}
+
+.trendRising {
+  background: rgba(239, 68, 68, 0.1);
+  color: $color-error;
+}
+
+.trendFalling {
+  background: rgba(16, 185, 129, 0.1);
+  color: $color-success;
+}
+
+.trendStable {
+  background: rgba(148, 163, 184, 0.1);
+  color: $color-text-tertiary;
+}
+
+.entryMeta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.entryAuthor,
+.entryTime,
+.entryEngagement {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
